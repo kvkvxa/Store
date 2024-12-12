@@ -2,7 +2,7 @@
 
 namespace Store
 {
-    public class Shop
+    public class Shop : IShopOperator
     {
         private readonly Warehouse _warehouse;
 
@@ -16,26 +16,36 @@ namespace Store
             return new Cart(this);
         }
 
-        public bool HasGood(Good good, int quantity)
+        public void EnsureGoodAvailability(Good good, int quantity)
         {
-            if (_warehouse.GetCellByName(good.Name) == null)
-            {
-                throw new InvalidOperationException($"There in no {good.Name} in the store");
-            }
+            var cell = _warehouse.GetCellByName(good.Name) ?? throw new InvalidOperationException($"There is no {good.Name} in the store.");
 
-            if (_warehouse.GetCellByName(good.Name).Quantity < quantity)
+            if (cell.Quantity < quantity)
             {
-                throw new InvalidOperationException($"There in not enough {good.Name} in the store");
+                throw new InvalidOperationException($"There is not enough {good.Name} in the store.");
             }
-
-            return true;
         }
 
         public void CommitOrder(Cart cart)
         {
-            foreach (IReadonlyCell cell in cart.GetCells())
+            ValidateOrder(cart);
+
+            foreach (IReadonlyCell cell in cart.Cells)
             {
                 _warehouse.GetCellByName(cell.Good.Name)?.DecreaseQuantity(cell.Quantity);
+            }
+        }
+
+        private void ValidateOrder(Cart cart)
+        {
+            foreach (IReadonlyCell cartCell in cart.Cells)
+            {
+                var warehouseCell = _warehouse.GetCellByName(cartCell.Good.Name);
+
+                if (warehouseCell == null || warehouseCell.Quantity < cartCell.Quantity)
+                {
+                    throw new InvalidOperationException($"Not enough of {cartCell.Good.Name} in stock.");
+                }
             }
         }
     }

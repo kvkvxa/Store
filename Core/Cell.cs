@@ -2,7 +2,7 @@
 
 namespace Store
 {
-    public class Cell : IReadonlyCell, IModifableCell
+    public class Cell : IReadonlyCell
     {
         public Cell(Good good, int quantity)
         {
@@ -27,12 +27,10 @@ namespace Store
                 throw new ArgumentException("Quantity must be greater than 0", nameof(quantity));
             }
 
-            if (Quantity + quantity < 0)
+            checked
             {
-                throw new OverflowException("Quantity of goods is too big");
+                Quantity += quantity;
             }
-
-            Quantity += quantity;
         }
 
         public void DecreaseQuantity(int amount)

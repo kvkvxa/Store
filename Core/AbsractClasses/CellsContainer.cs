@@ -8,6 +8,8 @@ namespace Store
     {
         private readonly List<Cell> _cells = new List<Cell>();
 
+        public List<Cell> Cells => _cells;
+
         public Cell GetCellByName(string name)
         {
             return _cells.FirstOrDefault(cell => cell.Good.Name == name);
@@ -15,7 +17,7 @@ namespace Store
 
         public virtual void Add(Good good, int quantity)
         {
-            IModifableCell existingCell = _cells.FirstOrDefault(cellToFind => cellToFind.Good.Name == good.Name);
+            Cell existingCell = _cells.FirstOrDefault(cellToFind => cellToFind.Good.Name == good.Name);
 
             if (existingCell != null)
             {
@@ -25,11 +27,6 @@ namespace Store
             {
                 _cells.Add(new Cell(good, quantity));
             }
-        }
-
-        public IReadOnlyList<IReadonlyCell> GetCells()
-        {
-            return _cells.ToList();
         }
 
         public void ShowGoods()
